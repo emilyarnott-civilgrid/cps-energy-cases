@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CPS Energy Utility Coordination Cases</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@200;400;500;700;800&family=Noto+Sans+Mono:wght@400;500;700&display=swap');
+  :root {
+    --cg-orange: #F27E31;
+    --cg-blue: #196FE0;
+    --cg-blue-60: #1458B3;
+    --cg-blue-10: #E3F0FD;
+    --cg-slate-80: #1F2C38;
+    --cg-slate-70: #2A3A4A;
+    --white: #FFFFFF;
+    --grey-10: #F4F5F5;
+    --grey-20: #E9EAE8;
+    --grey-30: #D2D4D7;
+    --grey-40: #BABDC0;
+    --grey-50: #888C90;
+    --grey-60: #6E7376;
+    --grey-70: #545858;
+    --grey-80: #393B3D;
+    --grey-90: #101E20;
+    --green-50: #2E7D32;
+    --green-10: #E8F5E9;
+    --yellow-50: #D4A017;
+    --yellow-10: #FFF8E1;
+    --red-50: #C62828;
+    --red-10: #FFEBEE;
+    --orange-10: #FFF3E0;
+    --bg: var(--white);
+    --surface: var(--grey-10);
+    --surface-hover: var(--grey-20);
+    --border: var(--grey-30);
+    --text: var(--grey-90);
+    --text-dim: var(--grey-50);
+    --accent: var(--cg-blue);
+    --accent-dim: var(--cg-blue);
+    --red: var(--red-50);
+    --orange: var(--cg-orange);
+    --green: var(--green-50);
+    --cat-digin: #C62828;
+    --cat-unknown: #196FE0;
+    --cat-relocation: #2E7D32;
+    --cat-conflicts: #F27E31;
+    --cat-sitedata: #7B3FA0;
+    --cat-permitting: #00838F;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.45;
+    min-height: 100vh;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  /* Header with CivilGrid branding */
+  header { margin-bottom: 24px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .header-text h1 { font-size: 24px; font-weight: 800; color: var(--grey-90); margin-bottom: 4px; letter-spacing: -0.01em; }
+  .header-text p { color: var(--grey-60); font-size: 14px; font-weight: 400; max-width: 700px; }
+  .header-text p strong { color: var(--cg-orange); font-weight: 700; }
+  .cg-wordmark { font-size: 20px; font-weight: 800; color: var(--cg-slate-80); letter-spacing: -0.02em; flex-shrink: 0; }
+
+  /* Stat cards */
+  .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 4px; padding: 12px 16px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .stat-card .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim); margin-bottom: 2px; font-weight: 500; }
+  .stat-card .value { font-size: 20px; font-weight: 800; line-height: 1; }
+  .stat-card .value.red { color: var(--red-50); }
+  .stat-card .value.orange { color: var(--cg-orange); }
+  .stat-card .value.green { color: var(--green-50); }
+
+  /* Controls bar */
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+  .filter-btn {
+    padding: 6px 14px; border-radius: 4px; border: 1px solid var(--border);
+    background: var(--white); color: var(--grey-70); cursor: pointer;
+    font-family: inherit; font-size: 12px; font-weight: 500; transition: all 0.15s;
+  }
+  .filter-btn:hover { border-color: var(--cg-blue); color: var(--grey-90); }
+  .filter-btn.active { background: var(--cg-slate-80); border-color: var(--cg-slate-80); color: #fff; }
+  .filter-btn .dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    margin-right: 6px; vertical-align: middle;
+  }
+  .search-box {
+    padding: 6px 12px; border-radius: 2px;
+    border: 1px solid var(--border); background: var(--white); color: var(--text);
+    font-family: inherit; font-size: 14px; font-weight: 400; outline: none;
+  }
+  .search-wrap { position: relative; flex: 1; min-width: 200px; display: flex; align-items: center; }
+  .search-wrap .search-box { flex: 1; min-width: 0; padding-right: 32px; }
+  .search-box:focus { border-color: var(--cg-blue); box-shadow: 0 0 0 2px var(--cg-blue-10); }
+  .search-box::placeholder { color: var(--grey-40); }
+  .search-help-btn {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--grey-30);
+    background: var(--white); color: var(--grey-50); font-size: 12px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    padding: 0; line-height: 1;
+  }
+  .search-help-btn:hover { background: var(--grey-10); color: var(--cg-dark-slate); }
+  .search-help-popup {
+    display: none; position: absolute; top: calc(100% + 6px); right: 0; z-index: 1000;
+    background: var(--white); border: 1px solid var(--border); border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12); padding: 14px 16px; width: 380px;
+  }
+  .search-help-popup.visible { display: block; }
+  .shp-title { font-weight: 600; font-size: 13px; margin-bottom: 8px; color: var(--cg-dark-slate); }
+  .shp-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .shp-table td { padding: 3px 0; vertical-align: top; }
+  .shp-table td:first-child { width: 130px; padding-right: 10px; }
+  .shp-code { font-family: monospace; font-size: 12px; background: var(--grey-05); padding: 1px 5px; border-radius: 3px; color: var(--cg-dark-slate); }
+  .shp-note { margin-top: 8px; font-size: 11px; color: var(--grey-50); }
+
+  .count-label { font-size: 12px; color: var(--text-dim); margin-bottom: 4px; font-weight: 500; }
+
+  /* Table — dense CivilGrid style */
+  table { width: 100%; border-collapse: collapse; border: 1px solid var(--border); table-layout: fixed; }
+  col.col-name     { width: 28%; }
+  col.col-category { width: 14%; }
+  col.col-overbudget { width: 12%; }
+  col.col-delay    { width: 10%; }
+  col.col-date     { width: 8%; }
+  col.col-owner    { width: 16%; }
+  col.col-location { width: 12%; }
+  thead th {
+    padding: 8px 12px; text-align: left; font-size: 11px; height: 32px;
+    text-transform: uppercase; letter-spacing: 0.5px; color: var(--grey-60); font-weight: 700;
+    border-bottom: 1px solid var(--border); cursor: pointer; user-select: none;
+    white-space: nowrap; position: sticky; top: 0; background: var(--grey-10); z-index: 2;
+    overflow: hidden;
+  }
+  thead th:hover { color: var(--grey-90); }
+  thead th .sort-arrow { margin-left: 4px; font-size: 10px; opacity: 0.3; }
+  thead th.sorted .sort-arrow { opacity: 1; color: var(--cg-blue); }
+
+  tbody tr.main-row {
+    cursor: pointer; transition: background 0.1s;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr.main-row:hover { background: var(--grey-10); }
+  tbody tr.main-row td { padding: 8px 12px; font-size: 13px; vertical-align: middle; height: 40px; overflow: hidden; text-overflow: ellipsis; }
+  tbody tr.main-row td:first-child { font-weight: 600; color: var(--grey-90); }
+
+  .expand-icon {
+    display: inline-block; width: 18px; height: 18px; line-height: 18px;
+    text-align: center; border-radius: 2px; background: var(--white);
+    border: 1px solid var(--border); font-size: 11px; margin-right: 8px;
+    transition: transform 0.2s, background 0.15s; flex-shrink: 0; color: var(--grey-60);
+  }
+  tr.main-row.expanded .expand-icon { transform: rotate(90deg); background: var(--cg-blue); border-color: var(--cg-blue); color: #fff; }
+
+  .name-cell { display: flex; align-items: center; }
+  .project-id { font-size: 10px; font-family: 'Noto Sans Mono', monospace; color: var(--grey-50); margin-right: 6px; flex-shrink: 0; letter-spacing: 0.3px; }
+  .name-text { overflow: hidden; text-overflow: ellipsis; }
+
+  /* Category badges — CivilGrid status tag style */
+  .category-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 8px;
+    font-size: 11px; font-weight: 500; white-space: nowrap; line-height: 1;
+  }
+  .cat-digin { background: #FFEBEE; color: #B71C1C; }
+  .cat-unknown { background: #E3F0FD; color: #1458B3; }
+  .cat-relocation { background: #E8F5E9; color: #1B5E20; }
+  .cat-conflicts { background: #FFF3E0; color: #B45309; }
+  .cat-sitedata { background: #F3E8FA; color: #5E2B80; }
+  .cat-permitting { background: #E0F5F7; color: #006064; }
+
+  .money { color: var(--red-50); font-weight: 600; font-variant-numeric: tabular-nums; font-size: 12px; }
+  .time-delay { color: var(--cg-orange); font-weight: 600; font-size: 12px; }
+  .location-text { color: var(--grey-60); font-size: 12px; }
+  .date-text { color: var(--grey-60); font-size: 12px; white-space: nowrap; }
+  .owner-text { color: var(--grey-70); font-size: 12px; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Detail row */
+  tr.detail-row { display: none; }
+  tr.detail-row.visible { display: table-row; }
+  tr.detail-row td { padding: 0 12px 16px 12px; border-bottom: 1px solid var(--border); }
+  .detail-content {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 4px; padding: 16px; margin-top: 4px;
+    animation: slideDown 0.15s cubic-bezier(0.2, 0, 0, 1);
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .detail-item .detail-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--grey-50); margin-bottom: 2px; font-weight: 500;
+  }
+  .detail-item .detail-value { font-size: 13px; font-weight: 500; }
+  .detail-description { font-size: 13px; color: var(--grey-70); line-height: 1.6; margin-bottom: 12px; }
+  .detail-source a { color: var(--cg-blue); text-decoration: none; font-size: 12px; word-break: break-all; }
+  .detail-source a:hover { text-decoration: underline; }
+  .detail-civilgrid { font-size: 13px; line-height: 1.5; margin-bottom: 12px; padding: 10px 12px; background: #FFF5EE; border-left: 3px solid var(--cg-orange); border-radius: 0 4px 4px 0; }
+  .detail-civilgrid strong { color: var(--cg-dark-slate); }
+  .missing { color: var(--grey-40); font-style: italic; font-size: 12px; }
+
+  .pagination {
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+    padding: 10px 0; font-size: 13px; user-select: none;
+  }
+  .pagination:empty { display: none; }
+  .page-btn {
+    min-width: 32px; height: 30px; padding: 0 8px; border: 1px solid var(--border);
+    border-radius: 4px; background: var(--white); color: var(--grey-70); cursor: pointer;
+    font-size: 12px; font-weight: 500; font-family: inherit;
+  }
+  .page-btn:hover { background: var(--grey-10); color: var(--grey-90); }
+  .page-btn.active { background: var(--cg-blue); color: var(--white); border-color: var(--cg-blue); }
+  .page-btn:disabled { opacity: 0.35; cursor: default; }
+  .page-info { font-size: 12px; color: var(--grey-50); margin: 0 8px; }
+
+  @media (max-width: 900px) {
+    .detail-grid { grid-template-columns: 1fr; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    table { font-size: 12px; }
+    thead th, tbody tr.main-row td { padding: 6px; }
+    .container { padding: 12px; }
+    header { flex-direction: column; }
+  }
+
+  /* View toggle — CivilGrid button group */
+  .view-toggle {
+    display: flex; border: 1px solid var(--border); border-radius: 4px;
+    overflow: hidden; margin-left: auto; flex-shrink: 0;
+  }
+  .view-btn {
+    padding: 6px 14px; border: none; background: var(--white); color: var(--grey-60);
+    cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 500; transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .view-btn:not(:last-child) { border-right: 1px solid var(--border); }
+  .view-btn:hover { color: var(--grey-90); background: var(--grey-10); }
+  .view-btn.active { background: var(--cg-slate-80); color: #fff; }
+  .view-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+  /* Map container — keeps dark theme */
+  #mapContainer {
+    display: none; width: 100%; height: 70vh; min-height: 500px;
+    border-radius: 8px; border: 1px solid var(--border); overflow: hidden;
+    position: relative;
+  }
+  #mapContainer.active { display: block; }
+
+  /* Map legend */
+  .map-legend {
+    position: absolute; bottom: 24px; right: 24px; z-index: 1000;
+    background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border: 1px solid var(--grey-30); border-radius: 4px;
+    padding: 12px 16px; font-size: 12px; color: var(--grey-90);
+  }
+  .map-legend-title { font-weight: 700; margin-bottom: 6px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--grey-60); }
+  .map-legend-item { display: flex; align-items: center; gap: 8px; margin: 4px 0; color: var(--grey-80); }
+  .map-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .map-count-badge {
+    position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 1000;
+    background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border: 1px solid var(--grey-30); border-radius: 20px;
+    padding: 6px 16px; font-size: 12px; color: var(--grey-60); pointer-events: none; font-weight: 500;
+  }
+
+  /* Leaflet popup — light theme */
+  .leaflet-popup-content-wrapper {
+    background: #fff !important; color: var(--grey-90) !important;
+    border-radius: 4px !important; border: 1px solid var(--grey-30) !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+  }
+  .leaflet-popup-tip { background: #fff !important; }
+  .leaflet-popup-close-button { color: var(--grey-50) !important; font-size: 18px !important; }
+  .leaflet-popup-close-button:hover { color: var(--grey-90) !important; }
+  .leaflet-popup-content { margin: 12px 14px !important; }
+  .map-popup { max-width: 320px; min-width: 220px; }
+  .map-popup-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; color: var(--grey-90); }
+  .map-popup-stats { display: flex; gap: 12px; margin: 6px 0; flex-wrap: wrap; }
+  .map-popup-desc { font-size: 11px; color: var(--grey-60); line-height: 1.5; margin: 6px 0; }
+  .map-popup-loc { font-size: 10px; color: var(--grey-50); margin-top: 4px; }
+  .map-popup-multi { border-top: 1px solid var(--grey-20); margin-top: 8px; padding-top: 8px; }
+  .map-popup-more { font-size: 11px; color: var(--cg-blue); margin-top: 4px; }
+
+  /* Cluster overrides — CivilGrid palette */
+  .marker-cluster-small { background: rgba(25,111,224,0.15) !important; }
+  .marker-cluster-small div { background: rgba(25,111,224,0.85) !important; color: #fff !important; }
+  .marker-cluster-medium { background: rgba(242,126,49,0.15) !important; }
+  .marker-cluster-medium div { background: rgba(242,126,49,0.85) !important; color: #fff !important; }
+  .marker-cluster-large { background: rgba(198,40,40,0.15) !important; }
+  .marker-cluster-large div { background: rgba(198,40,40,0.85) !important; color: #fff !important; }
+  .marker-cluster div { font-weight: 700 !important; font-size: 12px !important; font-family: 'Noto Sans', sans-serif !important; }
+
+  /* Statistics page */
+  .stats-page-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .stats-page-grid.full { grid-template-columns: 1fr; }
+  @media (max-width: 900px) { .stats-page-grid { grid-template-columns: 1fr; } }
+  .chart-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: 4px;
+    padding: 20px; overflow: hidden;
+  }
+  .chart-card.full-width { grid-column: 1 / -1; }
+  .chart-card h3 {
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--grey-60); margin-bottom: 16px;
+  }
+
+  /* Insight cards — CivilGrid numeric callout style */
+  .insight-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px;
+  }
+  .insight-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: 4px;
+    padding: 16px; text-align: center;
+  }
+  .insight-card .insight-value { font-size: 32px; font-weight: 200; margin-bottom: 2px; line-height: 1; }
+  .insight-card .insight-label { font-size: 11px; color: var(--grey-60); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
+  .insight-card .insight-sub { font-size: 10px; color: var(--grey-50); margin-top: 4px; }
+
+  /* Horizontal bar chart */
+  .hbar-row { display: flex; align-items: center; margin-bottom: 8px; gap: 8px; }
+  .hbar-label { min-width: 110px; font-size: 12px; color: var(--grey-70); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+  .hbar-track { flex: 1; height: 20px; background: var(--grey-10); border-radius: 2px; overflow: hidden; position: relative; border: 1px solid var(--grey-20); }
+  .hbar-fill { height: 100%; border-radius: 2px; transition: width 0.6s cubic-bezier(0.2,0,0,1); display: flex; align-items: center; padding-left: 8px; }
+  .hbar-fill span { font-size: 10px; font-weight: 700; color: #fff; white-space: nowrap; }
+  .hbar-value { min-width: 36px; font-size: 12px; font-weight: 600; color: var(--grey-60); }
+
+  /* Donut chart (SVG) */
+  .donut-wrap { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; justify-content: center; }
+  .donut-legend { display: flex; flex-direction: column; gap: 8px; }
+  .donut-legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .donut-legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .donut-legend-count { font-weight: 700; min-width: 28px; }
+  .donut-legend-pct { color: var(--grey-50); font-size: 11px; }
+
+  /* Ranked list */
+  .ranked-list { list-style: none; }
+  .ranked-list li {
+    display: flex; align-items: center; gap: 10px; padding: 8px 0;
+    border-bottom: 1px solid var(--grey-20); font-size: 12px;
+  }
+  .ranked-list li:last-child { border-bottom: none; }
+  .rank-num { font-size: 14px; font-weight: 800; color: var(--grey-40); min-width: 22px; text-align: center; }
+  .rank-num.gold { color: var(--cg-orange); }
+  .rank-num.silver { color: var(--grey-40); }
+  .rank-num.bronze { color: #A0522D; }
+  .rank-name { flex: 1; font-weight: 600; }
+  .rank-loc { color: var(--grey-50); font-size: 11px; }
+  .rank-value { font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  /* Timeline bar chart */
+  .timeline-bars { display: flex; align-items: flex-end; gap: 2px; height: 160px; padding-top: 8px; }
+  .timeline-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; }
+  .timeline-bar {
+    width: 100%; min-height: 2px; border-radius: 2px 2px 0 0; transition: height 0.4s cubic-bezier(0.2,0,0,1);
+    position: relative; cursor: default;
+  }
+  .timeline-bar:hover { opacity: 0.8; }
+  .timeline-bar-label { font-size: 9px; color: var(--grey-50); margin-top: 4px; writing-mode: vertical-lr; transform: rotate(180deg); max-height: 36px; overflow: hidden; font-weight: 500; }
+  .timeline-bar-count { font-size: 9px; font-weight: 700; color: var(--grey-70); margin-bottom: 2px; }
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js"></script>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="header-text">
+      <h1>CPS Energy Utility Coordination Cases</h1>
+      <p>San Antonio-area construction projects that were delayed or incurred added costs because of CPS Energy facilities, plans, or relocation work &mdash; issues that <strong>CivilGrid</strong> helps prevent.</p>
+    </div>
+    <div class="cg-wordmark">Civil<span>Grid</span></div>
+  </header>
+  <div class="stats-bar" id="statsBar"></div>
+  <div class="controls">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="Unknown or Mismapped Utilities"><span class="dot" style="background:var(--cat-unknown)"></span>Unknown or Mismapped Utilities</button>
+    <button class="filter-btn" data-filter="Utility Relocation Delays"><span class="dot" style="background:var(--cat-relocation)"></span>Utility Relocation Delays</button>
+    <button class="filter-btn" data-filter="Planned Project Conflicts"><span class="dot" style="background:var(--cat-conflicts)"></span>Planned Project Conflicts</button>
+    <button class="filter-btn" data-filter="Missing Site Data"><span class="dot" style="background:var(--cat-sitedata)"></span>Missing Site Data</button>
+    <div class="search-wrap">
+      <input type="text" class="search-box" placeholder="Search these projects — e.g. gas main, Alamo RMA, change order" id="searchBox">
+    </div>
+    <div class="view-toggle">
+      <button class="view-btn active" data-view="table"><svg viewBox="0 0 24 24"><path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"/></svg> Table</button>
+      <button class="view-btn" data-view="map"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg> Map</button>
+    </div>
+  </div>
+  <div id="tableContainer">
+  <div class="count-label" id="countLabel"></div>
+  <table>
+    <colgroup>
+      <col class="col-name"><col class="col-category"><col class="col-overbudget">
+      <col class="col-delay"><col class="col-date"><col class="col-owner"><col class="col-location">
+    </colgroup>
+    <thead>
+      <tr>
+        <th data-sort="name">Project <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="category">Issue Type <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="overbudget">Cost Impact <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="delay">Delay <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="date">Date <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="owner">Owner <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="location">Location <span class="sort-arrow">&#9650;</span></th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+  <div class="pagination" id="pagination"></div>
+  </div>
+  <div id="mapContainer"></div>
+</div>
+<script>
+const DATA = [
+{
+  name: "Lower Broadway Phase 1 Timeline Stretched for CPS/SAWS Work",
+  category: "Planned Project Conflicts",
+  location: "San Antonio, TX",
+  state: "Texas",
+  coords: [29.432, -98.483],
+  overbudgetAbs: null,
+  overbudgetPct: null,
+  overbudgetSort: 0,
+  delayAbs: "2021 &rarr; 2023 (Phase 1 completion)",
+  delayPct: null,
+  delaySort: 730,
+  description: "The first phase of San Antonio's $43M Broadway bond project, originally slated to finish in 2021, was stretched into 2023 so the street work could be aligned with planned utility maintenance, including CPS Energy and SAWS work.",
+  detail: "The 2.2-mile Broadway Street redevelopment is a $43 million 2017 bond project, with the entire corridor estimated for completion by the end of 2024. The first phase, on the southern mile from East Houston Street to I-35, was originally slated for completion in 2021, but the City worked with local utilities to align the project with planned maintenance along Broadway, stretching that phase into 2023. An assistant city engineer said the coordination was meant to avoid someone cutting a trench in the new street two years after it was built, referring to work being done on the street by CPS Energy and SAWS.",
+  budget: "$43M",
+  timeline: "Phase 1: 2021 planned &rarr; 2023",
+  help: "A shared view of CPS Energy's planned maintenance during the City's design phase would have let both programs be sequenced up front, instead of stretching the street schedule after the fact.",
+  source: "https://sanantonioreport.org/broadway-construction-bike-lanes/",
+  sources: ["https://sanantonioreport.org/broadway-construction-bike-lanes/"],
+  date: "2021-07",
+  owner: "City of San Antonio"
+},
+{
+  name: "I-10 Leon Springs Frontage Roads: CPS Gas Relocations Held Up",
+  category: "Utility Relocation Delays",
+  location: "San Antonio, TX",
+  state: "Texas",
+  coords: [29.663, -98.638],
+  overbudgetAbs: null,
+  overbudgetPct: null,
+  overbudgetSort: 0,
+  delayAbs: null,
+  delayPct: null,
+  delaySort: 0,
+  description: "On TxDOT's I-10 Leon Springs frontage-road conversion, conflicts with CPS Energy had to be worked out before some gas-line relocations could proceed, including many planned for the previous week.",
+  detail: "TxDOT's I-10 Leon Springs project converted frontage roads between Dominion Drive and Boerne Stage Road, with Texas Sterling Construction as contractor and a scheduled finish of mid-2016. In May 2015 TxDOT reported that gas lines were being relocated across the job, but conflicts with CPS Energy had to be worked out before some of them could be moved, including many that had been planned to move the previous week. The project also faced a separate major conflict with an AT&amp;T/Quest line at Boerne Stage Road.",
+  budget: null,
+  timeline: "Scheduled to finish mid-2016 (as of May 2015)",
+  help: "A shared relocation tracker would have surfaced the CPS Energy conflicts before the planned relocation dates, so the contractor wasn't left waiting on gas moves that had already been scheduled.",
+  source: "https://txdotsanantonio.blogspot.com/2015/05/i-10-frontage-roads-in-leon-springs.html",
+  sources: ["https://txdotsanantonio.blogspot.com/2015/05/i-10-frontage-roads-in-leon-springs.html"],
+  date: "2015-05",
+  owner: "TxDOT"
+},
+{
+  name: "Santa Rosa Street: 16-Inch CPS Gas Main Found at Unanticipated Shallow Depth",
+  category: "Unknown or Mismapped Utilities",
+  location: "San Antonio, TX",
+  state: "Texas",
+  coords: [29.4205, -98.4975],
+  overbudgetAbs: "$509,037.27",
+  overbudgetPct: null,
+  overbudgetSort: 509037,
+  delayAbs: null,
+  delayPct: null,
+  delaySort: 0,
+  description: "During construction of the Zona Cultural Santa Rosa Street bond project, an existing 16-inch CPS Energy gas main was discovered at an unanticipated shallow depth, conflicting with the new roadway elevation, and had to be reconstructed.",
+  detail: "During construction of the Zona Cultural Streets (Santa Rosa) project, an existing 16-inch CPS Energy gas main at the Santa Rosa Street and Nueva Street intersection was discovered at an unanticipated shallow depth and was in conflict with the new roadway elevation. The main had to be reconstructed at the intersection to allow proper depth clearance under the new roadway and meet Texas Railroad Commission regulations. City Council approved a $509,037.27 utility contract amendment with Sundt Construction, reimbursed by CPS Energy, bringing the construction contract to $31,559,486.68. Staff noted that bidding the work separately could have led to further project delays.",
+  budget: "$31,559,486.68 (revised construction contract)",
+  timeline: "Construction began Jan 2022; estimated completion Fall 2024",
+  help: "Verified depth data for the CPS Energy gas main during design would have flagged the clearance conflict before construction, avoiding a mid-project rebuild of a 16-inch main.",
+  source: "https://sanantonio.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=385dc51b-a66d-403f-9f8e-eff8a6e50a29",
+  sources: ["https://sanantonio.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=385dc51b-a66d-403f-9f8e-eff8a6e50a29"],
+  date: "2024-01",
+  owner: "City of San Antonio"
+},
+{
+  name: "Pleasanton Road: CPS Conflict Halts Critical-Path Work for Five Weeks",
+  category: "Utility Relocation Delays",
+  location: "San Antonio, TX",
+  state: "Texas",
+  coords: [29.36, -98.5],
+  overbudgetAbs: "$52,683.50",
+  overbudgetPct: null,
+  overbudgetSort: 52683,
+  delayAbs: "Work stopped Aug 9 &ndash; Sep 13, 2002",
+  delayPct: null,
+  delaySort: 35,
+  description: "On the Pleasanton Road (Mayfield to Southcross) widening, City Public Service (CPS) was in conflict with a proposed sanitary sewer line, stopping critical-path work for about five weeks; the City planned to seek reimbursement from CPS.",
+  detail: "TxDOT Change Order No. 1 compensated the contractor for delay costs incurred due to City Public Service (CPS, now CPS Energy) being in conflict with the proposed sanitary sewer line on East Gerald. The work was on the project's critical path, forcing the contractor to stop work from August 9 to September 13, 2002. Because CPS did not joint bid the project, TxDOT had no agreement with CPS, so the City, which does, said it would seek reimbursement from CPS. City Council authorized $52,683.50 payable to TxDOT for the change order.",
+  budget: "$1,462,475 (total estimated City project cost)",
+  timeline: "Scheduled for completion by March 2004",
+  help: "Identifying the CPS facility conflict with the planned sewer during design, and bringing CPS into the project agreement, would have kept the conflict off the critical path.",
+  source: "https://webapp1.sanantonio.gov/archivedagendas/docsguest/2dbq01!.PDF",
+  sources: ["https://webapp1.sanantonio.gov/archivedagendas/docsguest/2dbq01!.PDF"],
+  date: "2003-09",
+  owner: "TxDOT / City of San Antonio"
+},
+{
+  name: "Talley Road Phase I: Contractor Files Delay Claim Against CPS Gas",
+  category: "Utility Relocation Delays",
+  location: "San Antonio, TX",
+  state: "Texas",
+  coords: [29.44, -98.72],
+  overbudgetAbs: null,
+  overbudgetPct: null,
+  overbudgetSort: 0,
+  delayAbs: null,
+  delayPct: null,
+  delaySort: 0,
+  description: "The contractor widening Talley Road for the Alamo Regional Mobility Authority submitted a delay claim against CPS Gas for delays caused by CPS's failure to coordinate a gas tie-in properly.",
+  detail: "Talley Road Phase I, from Potranco Road (FM 1957) to Wiseman Blvd., is a $22.3 million Alamo RMA / Bexar County project built by Texas Sterling Construction. The August 2020 project status report states that a delay claim was submitted by the contractor against CPS Gas for delays caused by CPS failure to coordinate a gas tie-in properly. The same report shows the contractor working on gas line connections for CPS.",
+  budget: "$22,305,572.62 (construction cost)",
+  timeline: "NTP Nov 11, 2019; contract completion Jul 5, 2022",
+  help: "A shared schedule for joint-bid utility work would have lined up the CPS gas tie-in with the roadway contractor's sequence, avoiding the coordination failure behind the delay claim.",
+  source: "https://www.bexar.org/AgendaCenter/ViewFile/Agenda/_08192020-1172",
+  sources: ["https://www.bexar.org/AgendaCenter/ViewFile/Agenda/_08192020-1172"],
+  date: "2020-08",
+  owner: "Alamo RMA / Bexar County"
+},
+{
+  name: "Foster Road Phase III: CPS Gas Line Change Orders Push Back Roadway Work",
+  category: "Utility Relocation Delays",
+  location: "San Antonio, TX",
+  state: "Texas",
+  coords: [29.43, -98.34],
+  overbudgetAbs: "$708,192.20",
+  overbudgetPct: null,
+  overbudgetSort: 708192,
+  delayAbs: null,
+  delayPct: null,
+  delaySort: 0,
+  description: "On Foster Road Phase III, the joint-bid CPS gas line was the critical item, and change orders on the CPS gas line pushed back scheduled roadway work, raising the potential for a contractor overhead claim.",
+  detail: "Foster Road Phase III (IH 10 to Houston Street / FM 1346) is a Texas Sterling Construction project for the Alamo RMA and Bexar County. The August 2020 status report called the joint-bid CPS gas line the critical item for the current phase and flagged the potential for a claim for additional overhead from the contractor due to change orders on the CPS gas line pushing back scheduled roadway work. In September 2020 the board approved a CPS change order after CPS directed the contractor to complete additional gas work, adding $708,192.20 in material and overhead costs. Projected completion had slipped from the contract date of Oct 17, 2021 to Dec 10, 2021.",
+  budget: "$14,767,584.74 (construction cost)",
+  timeline: "NTP Oct 28, 2019; contract completion Oct 17, 2021; projected Dec 10, 2021",
+  help: "Settling the CPS gas scope before construction, and tracking it on a schedule shared with the roadway contractor, would have kept gas-line changes from pushing back the critical path.",
+  source: "https://www.bexar.org/AgendaCenter/ViewFile/Agenda/_08192020-1172",
+  sources: ["https://www.bexar.org/AgendaCenter/ViewFile/Agenda/_08192020-1172", "https://www.bexar.org/AgendaCenter/ViewFile/Minutes/_11182020-1211"],
+  date: "2020-08",
+  owner: "Alamo RMA / Bexar County"
+},
+{
+  name: "Evans Road Phase II: Unplanned CPS Gas Line Conflict Delays Completion",
+  category: "Unknown or Mismapped Utilities",
+  location: "San Antonio, TX",
+  state: "Texas",
+  coords: [29.645, -98.41],
+  overbudgetAbs: "$222,970.50",
+  overbudgetPct: null,
+  overbudgetSort: 222970,
+  delayAbs: "2&ndash;3 months (projected)",
+  delayPct: null,
+  delaySort: 75,
+  description: "A CPS Gas line that was not planned for relocation was found to conflict with final grading on Evans Road Phase II, pushing completion back an estimated 2-3 months and adding a $222,970.50 CPS change order.",
+  detail: "In January 2021, Alamo RMA staff reported that a CPS Gas line, which was not planned for relocation, was deemed to be in conflict with the final grading and was being adjusted, pushing project completion back 2-3 months (though the project was still expected to finish ahead of schedule). In April 2021 the board approved a change order: the CPS gas line was in conflict with proposed ditch grading, and CPS directed the contractor to complete additional work, adding $222,970.50 in material and overhead costs. By June 2021, staff reported that the CPS Gas line that was causing the project delay had been adjusted. The $9,557,884.50 contract with Jordan Foster Construction included $858,270 for CPS gas joint-bid relocations.",
+  budget: "$9,557,884.50 (construction contract)",
+  timeline: null,
+  help: "Checking CPS gas line locations against the final grading during design would have put this line on the relocation list from the start, instead of discovering the conflict late in construction.",
+  source: "https://www.bexar.org/AgendaCenter/ViewFile/Minutes/_01202021-1226",
+  sources: ["https://www.bexar.org/AgendaCenter/ViewFile/Minutes/_01202021-1226", "https://www.bexar.org/AgendaCenter/ViewFile/Minutes/_04212021-1257", "https://elections.bexar.org/DocumentCenter/View/30997/Alamo-RMA-Board-Meeting-Minutes-June-16-2021-PDF"],
+  date: "2021-01",
+  owner: "Alamo RMA / Bexar County"
+},
+{
+  name: "Military Drive West: SAWS and CPS Scope Changes Drive Year-Plus Delay",
+  category: "Utility Relocation Delays",
+  location: "San Antonio, TX",
+  state: "Texas",
+  coords: [29.405, -98.69],
+  overbudgetAbs: "$640,000",
+  overbudgetPct: "~7% over $9.3M",
+  overbudgetSort: 640000,
+  delayAbs: "More than 1 year",
+  delayPct: null,
+  delaySort: 365,
+  description: "A Bexar County / Alamo RMA project on West Side Military Drive ran more than a year behind schedule; the county said the main delay was utility challenges, with SAWS and CPS Energy returning to the board with scope changes.",
+  detail: "Work started in November 2022 and residents were told it would be finished by March 2024. A county spokesperson said the main delay had been utility challenges, with SAWS and CPS Energy having to come back to the Alamo RMA board with changes in their scope; the unexpected utility work cost an additional $640,000 over the $9.3 million project, to be paid by SAWS and CPS Energy. Alamo RMA minutes show that in May 2023 completion of the CPS Gas work was being delayed by a conflict with an existing storm drain system, and in September 2023 the board approved a $155,600 CPS change order because a CPS gas line needed to be constructed in a manner differing from the proposed plans. The project also faced caves discovered during construction and contractor staffing problems.",
+  budget: "$9.3M",
+  timeline: "Started Nov 2022; promised by Mar 2024",
+  help: "Resolving the CPS Energy and SAWS scope against existing underground infrastructure, like the storm drain the gas line conflicted with, before construction would have avoided repeated scope changes mid-project.",
+  source: "https://news4sanantonio.com/news/instagram/waste-watch-west-side-road-project-a-year-behind-schedule-660k-overbudget",
+  sources: ["https://news4sanantonio.com/news/instagram/waste-watch-west-side-road-project-a-year-behind-schedule-660k-overbudget", "https://elections.bexar.org/DocumentCenter/View/39404/Alamo-RMA-Board-Meeting-Minutes-May-17-2023-", "https://elections.bexar.org/DocumentCenter/View/43265/Alamo-RMA-Board-Meeting-Minutes-September-20-2023"],
+  date: "2025-04",
+  owner: "Alamo RMA / Bexar County"
+},
+{
+  name: "West Military Drive &amp; Ingram Road Connectors: Late CPS Design Misses Bid Package",
+  category: "Planned Project Conflicts",
+  location: "San Antonio, TX",
+  state: "Texas",
+  coords: [29.47, -98.62],
+  overbudgetAbs: "$271,605",
+  overbudgetPct: null,
+  overbudgetSort: 271605,
+  delayAbs: null,
+  delayPct: null,
+  delaySort: 0,
+  description: "Because CPS Energy was late providing its streetlight design, the streetlights were left out of the bid package for a 2017 Bond street project and had to be added by a $271,605 change order.",
+  detail: "Due to a delay in CPS Energy providing the design, the streetlights design was not included in the bid package for the West Military Drive and Ingram Road Connectors project, so the foundations and conduits needed for the streetlights were not part of E-Z Bel Construction's contract award. City Council approved a $271,605 change order, raising the contract to $8,007,873.70.",
+  budget: "$8,007,873.70 (revised contract)",
+  timeline: "Construction Jul 2019 &ndash; est. Mar 2020",
+  help: "Tracking CPS Energy's design deliverables against the City's bid date would have flagged the missing streetlight design before the package went out.",
+  source: "https://sanantonio.legistar.com/ViewReport.ashx?M=R&amp;N=TextL5&amp;GID=350&amp;ID=33634&amp;GUID=LATEST&amp;Title=Agenda+Memo",
+  sources: ["https://sanantonio.legistar.com/ViewReport.ashx?M=R&amp;N=TextL5&amp;GID=350&amp;ID=33634&amp;GUID=LATEST&amp;Title=Agenda+Memo"],
+  date: "2019-11",
+  owner: "City of San Antonio"
+},
+{
+  name: "South Presa Street: CPS Gas Plan Errors Require Contract Amendment",
+  category: "Missing Site Data",
+  location: "San Antonio, TX",
+  state: "Texas",
+  coords: [29.36, -98.47],
+  overbudgetAbs: "$135,824.27",
+  overbudgetPct: null,
+  overbudgetSort: 135824,
+  delayAbs: null,
+  delayPct: null,
+  delaySort: 0,
+  description: "A contract amendment requested by CPS Energy compensated the South Presa Street contractor for CPS gas items that were over- or underrun due to plan errors and field changes.",
+  detail: "On the South Presa Street (S.E. Military to W. Boyer) project, CPS Energy requested a $135,824.27 contract amendment payable to E-Z Bel Construction to compensate the contractor for all CPS gas items that were over or underrun due to plan errors and field changes related to the project's utility work. To prevent further delay in project completion, the City and CPS Energy agreed to let the contractor proceed and complete construction. The project was substantially completed in May 2024.",
+  budget: "$16,803,229.54 (revised construction contract)",
+  timeline: "Substantially complete May 2024",
+  help: "Field-verified utility data in the CPS gas plans would have reduced the plan errors and field changes that drove quantity overruns.",
+  source: "https://sanantonio.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=51738d69-3691-4517-ade8-f239ae359b09",
+  sources: ["https://sanantonio.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=51738d69-3691-4517-ade8-f239ae359b09"],
+  date: "2024-10",
+  owner: "City of San Antonio"
+},
+{
+  name: "Wilson Boulevard &amp; Thespian Island: CPS Gas Change Made Without the City",
+  category: "Missing Site Data",
+  location: "San Antonio, TX",
+  state: "Texas",
+  coords: [29.465, -98.55],
+  overbudgetAbs: "$125,230.52",
+  overbudgetPct: "~14% over original contract",
+  overbudgetSort: 125230,
+  delayAbs: null,
+  delayPct: null,
+  delaySort: 0,
+  description: "CPS Energy's joint-bid gas main work needed a wider trench than designed; the change was handled directly between the contractor and CPS, and the City learned of it only at final payment.",
+  detail: "CPS Energy joint bid the replacement of three gas mains, gas services and associated facilities with the Wilson Boulevard (Club Drive to Donaldson Avenue) &amp; Thespian Island project. To install the gas main, the contractor required a wider trench than originally anticipated during design. The additional work was communicated directly between the contractor and CPS Energy as an urgent unforeseen condition, and the City was notified only after the project was completed, as the contractor was submitting final payment. Council approved a $125,230.52 change order, reimbursed by CPS Energy, bringing the contract to $1,010,130.89.",
+  budget: "$1,010,130.89 (revised contract)",
+  timeline: "Construction Jun &ndash; Oct 2015",
+  help: "A shared record of field changes on joint-bid work would have kept the City, as project owner, informed of the CPS gas change when it happened rather than at final payment.",
+  source: "https://sanantonio.legistar.com/ViewReport.ashx?M=R&amp;N=TextL5&amp;GID=350&amp;ID=10249&amp;GUID=LATEST&amp;Title=Agenda+Memo",
+  sources: ["https://sanantonio.legistar.com/ViewReport.ashx?M=R&amp;N=TextL5&amp;GID=350&amp;ID=10249&amp;GUID=LATEST&amp;Title=Agenda+Memo"],
+  date: "2015-12",
+  owner: "City of San Antonio"
+},
+{
+  name: "South Alamo Street: CPS Gas Main Alignment Redesigned During Construction",
+  category: "Unknown or Mismapped Utilities",
+  location: "San Antonio, TX",
+  state: "Texas",
+  coords: [29.419, -98.491],
+  overbudgetAbs: "$116,937",
+  overbudgetPct: null,
+  overbudgetSort: 116937,
+  delayAbs: null,
+  delayPct: null,
+  delaySort: 0,
+  description: "On the South Alamo Street bond project, existing utilities discovered during construction conflicted with the proposed utilities, including CPS's planned gas main alignment, forcing redesigns and the removal of a CPS gas main.",
+  detail: "CPS's original scope on South Alamo Street (East Cesar E. Chavez Boulevard to East Market Street) included different alignments for the proposed gas main and storm drain lines. During construction, portions of existing utilities were discovered to conflict with the proposed utilities, so the utility alignments were redesigned, revised and relocated. A $116,937 amendment covered CPS-related field changes associated with the removal of a CPS gas main. The City said the designs were based on as-built information from the partnering utilities, and that the project had been redesigned multiple times.",
+  budget: "$42,530,795.65 (revised construction contract)",
+  timeline: "Construction Dec 2022 &ndash; est. Summer 2025",
+  help: "Verifying the partnering utilities' as-built records before design, rather than relying on them as-is, would have caught the conflicts that forced multiple redesigns of the CPS gas alignment.",
+  source: "https://sanantonio.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=4ef6c50c-789d-4833-b39a-53b81834fc1a",
+  sources: ["https://sanantonio.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=4ef6c50c-789d-4833-b39a-53b81834fc1a"],
+  date: "2025-01",
+  owner: "City of San Antonio"
+},
+{
+  name: "South Gevers Street Drainage: CPS Gas Adjustments Add Overruns Amid 5-Month Delay",
+  category: "Utility Relocation Delays",
+  location: "San Antonio, TX",
+  state: "Texas",
+  coords: [29.4, -98.45],
+  overbudgetAbs: null,
+  overbudgetPct: null,
+  overbudgetSort: 0,
+  delayAbs: "5 months (project overall)",
+  delayPct: null,
+  delaySort: 150,
+  description: "The City's South Gevers Street drainage project reported a 5-month delay; alongside a storm drain/sewer conflict, CPS Energy gas main and service adjustments caused bid item overruns and additional street reconstruction.",
+  detail: "The City's project page for South Gevers St. Drainage Improvements Phase 1 (update dated May 3, 2024) listed project delays of 5 months. It cited a conflict between the proposed storm drain system and a sewer line that forced a redesign, and added that CPS Energy performed gas main and property service adjustments which caused bid item overruns and additional street reconstruction. Construction began in Spring 2022.",
+  budget: null,
+  timeline: "Began Spring 2022; anticipated substantial completion Spring 2024",
+  help: "Coordinating CPS Energy's gas adjustments with the drainage design up front would have folded them into the original bid instead of adding overruns and extra street reconstruction.",
+  source: "https://web.archive.org/web/20240716031856/https://saspeakup.com/i2736",
+  sources: ["https://web.archive.org/web/20240716031856/https://saspeakup.com/i2736"],
+  date: "2024-05",
+  owner: "City of San Antonio"
+},
+{
+  name: "McCullough Avenue: Storm Sewer Redesigned Around CPS Substations and Duct Banks",
+  category: "Planned Project Conflicts",
+  location: "San Antonio, TX",
+  state: "Texas",
+  coords: [29.495, -98.49],
+  overbudgetAbs: "$11,103 (redesign fee)",
+  overbudgetPct: null,
+  overbudgetSort: 11103,
+  delayAbs: null,
+  delayPct: null,
+  delaySort: 0,
+  description: "The City paid to realign the McCullough Avenue storm sewer around existing CPS substations, underground duct banks and a CPS vault, to avoid an anticipated 18-24 month utility delay.",
+  detail: "On the McCullough (Union Pacific Railroad tracks to Basse) street and drainage project, the City authorized $11,103 for its engineer, Carter &amp; Burgess, to re-align the storm sewer system. The decision came from coordination between the City and City Public Service about the project's impact on existing CPS substations and underground duct banks, and the added fee covered correcting the 90% plans to accommodate a CPS vault in the roadway. The realignment was made to prevent an anticipated 18 to 24 month delay for the necessary utility planning, design and construction before the street and drainage project could start.",
+  budget: null,
+  timeline: "Construction anticipated to begin Mar 2005",
+  help: "Mapping CPS substations, duct banks and vaults at the start of design would have avoided redesigning 90% plans around them.",
+  source: "https://webapp1.sanantonio.gov/archivedagendas/docsguest/4vc501!.PDF",
+  sources: ["https://webapp1.sanantonio.gov/archivedagendas/docsguest/4vc501!.PDF"],
+  date: "2004-01",
+  owner: "City of San Antonio"
+},
+{
+  name: "Airport Terminal B Utility Relocation: CPS System Upgrade Changes the Design",
+  category: "Planned Project Conflicts",
+  location: "San Antonio, TX",
+  state: "Texas",
+  coords: [29.533, -98.469],
+  overbudgetAbs: "$177,557",
+  overbudgetPct: "~3% of $5.64M contract",
+  overbudgetSort: 177557,
+  delayAbs: null,
+  delayPct: null,
+  delaySort: 0,
+  description: "A CPS Energy system upgrade during the airport's Terminal B utility relocation added switchgear, a manhole and duct bank, producing a field alteration titled \"CPS Changes (Changed Conditions/Incomplete Drawings).\"",
+  detail: "The City awarded a $5,638,500 contract for utility relocation for Terminal B at San Antonio International Airport. Field Alteration No. 4, \"CPS Changes (Changed Conditions/Incomplete Drawings),\" arose because the contract documents showed the new electrical distribution system connecting to an existing manhole, but as part of a CPS Energy system upgrade, switchgear was added, along with a switchgear pad, a new manhole and additional duct bank. Total compensation for the field alteration was $177,557, with CPS funding $63,909 of the system upgrade costs. The contractor was directed to proceed before Council consideration due to the critical nature of the work and the impact on the schedule.",
+  budget: "$5,638,500 (original contract)",
+  timeline: null,
+  help: "Capturing CPS Energy's planned system upgrades in the design documents would have avoided a changed-conditions field alteration once construction was underway.",
+  source: "https://webapp1.sanantonio.gov/archivedagendas/docsguest/7qvgj01!.PDF",
+  sources: ["https://webapp1.sanantonio.gov/archivedagendas/docsguest/7qvgj01!.PDF"],
+  date: "2006-05",
+  owner: "City of San Antonio Aviation Dept."
+},
+{
+  name: "North Main Avenue &amp; Soledad Street: Aging CPS Gas Main Flagged Mid-Construction",
+  category: "Planned Project Conflicts",
+  location: "San Antonio, TX",
+  state: "Texas",
+  coords: [29.428, -98.494],
+  overbudgetAbs: "$513,886.69",
+  overbudgetPct: null,
+  overbudgetSort: 513886,
+  delayAbs: null,
+  delayPct: null,
+  delaySort: 0,
+  description: "Partway through the North Main &amp; Soledad bond project, CPS's 12-inch Soledad Street gas main was found to need replacement due to its age and condition, adding a $513,886.69 utility amendment.",
+  detail: "The North Main Avenue &amp; Soledad Street (Pecan Street to Navarro Street) 2017 Bond project included joint-bid CPS Energy utility work. During construction, it was identified that the existing 12-inch gas main along Soledad Street from Savings Street to Navarro Street needed replacement due to its age and condition. Council approved a $513,886.69 utility contract amendment, reimbursed by CPS Energy, for the gas main improvements and associated street restoration.",
+  budget: null,
+  timeline: "Construction Mar 2022 &ndash; est. Sep 2023",
+  help: "Sharing CPS Energy's asset condition and replacement plans during the City's design phase would have put the gas main replacement into the original scope instead of adding it mid-construction.",
+  source: "https://sanantonio.primegov.com/meeting/document/6843.pdf?name=Agenda%20Memo",
+  sources: ["https://sanantonio.primegov.com/meeting/document/6843.pdf?name=Agenda%20Memo"],
+  date: "2022-10",
+  owner: "City of San Antonio"
+},
+{
+  name: "Seneca West Drainage: Contractor Waits on CPS Pole Relocation",
+  category: "Utility Relocation Delays",
+  location: "Leon Valley, TX",
+  state: "Texas",
+  coords: [29.495, -98.615],
+  overbudgetAbs: null,
+  overbudgetPct: null,
+  overbudgetSort: 0,
+  delayAbs: null,
+  delayPct: null,
+  delaySort: 0,
+  description: "After Leon Valley issued a Notice to Proceed on its Seneca West drainage project, CPS Energy still had to move an electrical pole and rerun service to a home before the project could proceed.",
+  detail: "A pre-construction meeting for Leon Valley's Seneca West drainage project was held on January 9, 2023, and a Notice to Proceed was issued for January 23. However, CPS Energy had to move an electrical pole and rerun service to a home before the project could proceed, and the contractor submitted material selections for approval while the City waited. This was still the status in the City Manager's March 2023 report.",
+  budget: null,
+  timeline: "NTP issued for Jan 23, 2023; still waiting as of Mar 2023 report",
+  help: "Scheduling the CPS Energy pole relocation as a tracked prerequisite before the Notice to Proceed would have let the contractor start on the date issued.",
+  source: "https://www.leonvalleytexas.gov/sites/default/files/fileattachments/administration/page/3501/03-07-2023.pdf",
+  sources: ["https://www.leonvalleytexas.gov/sites/default/files/fileattachments/administration/page/3501/03-07-2023.pdf"],
+  date: "2023-03",
+  owner: "City of Leon Valley"
+},
+{
+  name: "Lookout Road Reconstruction: Bidding on Hold Pending CPS Relocation Schedule",
+  category: "Utility Relocation Delays",
+  location: "Schertz, TX",
+  state: "Texas",
+  coords: [29.58, -98.3],
+  overbudgetAbs: null,
+  overbudgetPct: null,
+  overbudgetSort: 0,
+  delayAbs: null,
+  delayPct: null,
+  delaySort: 0,
+  description: "Schertz could not finalize right-of-way plans or set bidding and construction schedules for its Lookout Road reconstruction while it waited on CPS confirmation and a CPS relocation schedule.",
+  detail: "Schertz's Lookout Road reconstruction (construction estimate $6,738,092) was waiting in October 2024 for confirmation from CPS that the right-of-way adjustments the City made to its plans were acceptable, and for a relocation schedule from CPS. Staff said that once they had the CPS relocation schedule, they could establish the bidding and anticipated construction schedule for the project.",
+  budget: "$6,738,092 (construction estimate)",
+  timeline: null,
+  help: "A shared utility relocation schedule would have given Schertz the CPS dates it needed to finalize right-of-way and set a bid date.",
+  source: "https://public.destinyhosted.com/scherdocs/2024/CC/20241015_723/3876_10-15-24_Council_Update_on_in-progress_projects.pdf",
+  sources: ["https://public.destinyhosted.com/scherdocs/2024/CC/20241015_723/3876_10-15-24_Council_Update_on_in-progress_projects.pdf"],
+  date: "2024-10",
+  owner: "City of Schertz"
+}
+];
+const GEOCODE = {
+"San Antonio, TX":[29.42,-98.49],
+"Leon Valley, TX":[29.495,-98.615],
+"Schertz, TX":[29.58,-98.30]
+};
+
+// ── Map state ──
+let map = null;
+let markerLayer = null;
+let currentView = 'table';
+
+const CATEGORIES = [
+  { name: "Dig-in / Line Strike", cls: "cat-digin", color: "#C62828" },
+  { name: "Unknown or Mismapped Utilities", cls: "cat-unknown", color: "#196FE0" },
+  { name: "Utility Relocation Delays", cls: "cat-relocation", color: "#2E7D32" },
+  { name: "Planned Project Conflicts", cls: "cat-conflicts", color: "#F27E31" },
+  { name: "Missing Site Data", cls: "cat-sitedata", color: "#7B3FA0" },
+  { name: "Permitting Challenges", cls: "cat-permitting", color: "#00838F" },
+];
+const CATEGORY_BY_NAME = Object.fromEntries(CATEGORIES.map(c => [c.name, c]));
+const PRESENT_CATEGORIES = CATEGORIES.filter(c => DATA.some(d => d.category === c.name));
+
+function getCatColor(cat) {
+  return (CATEGORY_BY_NAME[cat] || {}).color || "#888C90";
+}
+
+function initMap() {
+  if (map) return;
+  map = L.map('mapContainer', { center: [29.5, -98.5], zoom: 10, zoomControl: true, maxZoom: 19 });
+  L.maplibreGL({ style: 'https://tiles.openfreemap.org/styles/positron' }).addTo(map);
+  map.attributionControl.addAttribution('<a href="https://openfreemap.org" target="_blank">OpenFreeMap</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors');
+  markerLayer = L.markerClusterGroup({
+    chunkedLoading: true, maxClusterRadius: 45, spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false, animate: true, disableClusteringAtZoom: 14,
+    iconCreateFunction: function(cluster) {
+      const n = cluster.getChildCount();
+      const sz = n > 25 ? 'large' : n > 10 ? 'medium' : 'small';
+      return L.divIcon({ html: '<div><span>' + n + '</span></div>',
+        className: 'marker-cluster marker-cluster-' + sz, iconSize: L.point(40, 40) });
+    }
+  });
+  map.addLayer(markerLayer);
+
+  // Add legend
+  const legend = L.control({ position: 'bottomright' });
+  legend.onAdd = function() {
+    const div = L.DomUtil.create('div', 'map-legend');
+    div.innerHTML = '<div class="map-legend-title">Issue Type</div>' +
+      PRESENT_CATEGORIES.map(c => '<div class="map-legend-item"><span class="map-legend-dot" style="background:' + c.color + '"></span>' + c.name + '</div>').join('');
+    return div;
+  };
+  legend.addTo(map);
+}
+
+function buildPopupHTML(projects) {
+  let html = '';
+  const show = projects.slice(0, 3);
+  show.forEach((d, i) => {
+    if (i > 0) html += '<div class="map-popup-multi"></div>';
+    html += '<div class="map-popup">' +
+      '<div class="map-popup-name">' + d.name + '</div>' +
+      '<span class="category-badge ' + getCatClass(d.category) + '" style="font-size:11px;margin-bottom:4px">' + d.category + '</span>' +
+      '<div class="map-popup-stats">' +
+        (d.overbudgetAbs ? '<span class="money">' + d.overbudgetAbs + '</span>' : '') +
+        (d.delayAbs ? '<span class="time-delay">' + d.delayAbs + '</span>' : '') +
+      '</div>' +
+      '<div class="map-popup-desc">' + d.description + '</div>' +
+      '</div>';
+  });
+  if (projects.length > 3) {
+    html += '<div class="map-popup-more">+ ' + (projects.length - 3) + ' more project' + (projects.length - 3 > 1 ? 's' : '') + ' at this location</div>';
+  }
+  if (projects.length > 0) {
+    html += '<div class="map-popup-loc">' + projects[0].location + '</div>';
+  }
+  return html;
+}
+
+function renderMap() {
+  if (typeof L === 'undefined') return;
+  if (!map) initMap();
+  markerLayer.clearLayers();
+  const visible = getVisible();
+
+  // Group by location for popup aggregation
+  const byLoc = {};
+  visible.forEach(d => {
+    const key = d.location;
+    if (!byLoc[key]) byLoc[key] = [];
+    byLoc[key].push(d);
+  });
+
+  const markers = [];
+  let seed = 1;
+  function jitter() { seed = (seed * 16807) % 2147483647; return ((seed / 2147483647) - 0.5) * 0.008; }
+
+  Object.entries(byLoc).forEach(([loc, projects]) => {
+    projects.forEach((d, i) => {
+      const coords = d.coords || GEOCODE[loc];
+      if (!coords) return;
+      const lat = coords[0] + (!d.coords && projects.length > 1 ? jitter() : 0);
+      const lng = coords[1] + (!d.coords && projects.length > 1 ? jitter() : 0);
+      const marker = L.circleMarker([lat, lng], {
+        radius: Math.min(10, 6 + Math.log10(Math.max(1, d.overbudgetSort)) * 0.4),
+        fillColor: getCatColor(d.category), color: 'rgba(255,255,255,0.6)',
+        weight: 1.5, fillOpacity: 0.85
+      });
+      // Single project popup for individual markers
+      marker.bindPopup(buildPopupHTML([d]), { maxWidth: 360, maxHeight: 400 });
+      markers.push(marker);
+    });
+  });
+
+  markerLayer.addLayers(markers);
+
+  // Update count badge
+  let badge = document.getElementById('mapCountBadge');
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.id = 'mapCountBadge';
+    badge.className = 'map-count-badge';
+    document.getElementById('mapContainer').appendChild(badge);
+  }
+  badge.textContent = visible.length + ' project' + (visible.length === 1 ? '' : 's');
+
+  setTimeout(function() {
+    if (!map) return;
+    map.invalidateSize();
+    if (markers.length) map.fitBounds(L.featureGroup(markers).getBounds(), { padding: [40, 40], maxZoom: 13 });
+  }, 150);
+}
+
+function switchView(view) {
+  currentView = view;
+  document.getElementById('tableContainer').style.display = view === 'table' ? '' : 'none';
+  const mapEl = document.getElementById('mapContainer');
+  if (view === 'map') { mapEl.classList.add('active'); renderMap(); } else { mapEl.classList.remove('active'); }
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+}
+
+const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function fmtDate(d) {
+  if (!d) return "";
+  const parts = d.split("-");
+  if (parts.length === 2) return MONTH_NAMES[parseInt(parts[1], 10) - 1] + " " + parts[0];
+  return d;
+}
+
+function getCatClass(cat) {
+  return (CATEGORY_BY_NAME[cat] || {}).cls || "";
+}
+
+let sortCol = "overbudget";
+let sortDir = -1;
+let activeFilter = "all";
+let searchTerm = "";
+
+const SYNONYMS = {
+  "fiber": ["fiber", "fibre", "broadband", "fttp", "ftth", "fiber optic", "fiber-optic"],
+  "gas": ["gas", "natural gas", "gas main", "gas line", "gas pipe"],
+  "water": ["water", "water main", "water line", "water pipe", "water transmission"],
+  "sewer": ["sewer", "sewage", "wastewater", "sanitary", "force main", "cso"],
+  "electric": ["electric", "electrical", "power line", "transmission line", "substation", "transformer"],
+  "telecom": ["telecom", "telephone", "cable", "communications", "conduit"],
+  "explosion": ["explosion", "exploded", "blast", "detonation", "blew up"],
+  "fire": ["fire", "blaze", "flames", "ignit", "burn"],
+  "rail": ["rail", "light rail", "lrt", "subway", "metro", "transit", "streetcar", "trolley"],
+  "highway": ["highway", "freeway", "interstate", "expressway", "motorway", "turnpike"],
+  "bridge": ["bridge", "overpass", "viaduct", "span"],
+  "tunnel": ["tunnel", "bore", "tbm", "boring machine"],
+  "moratorium": ["moratorium", "paving ban", "protected street", "street cut"],
+  "drilling": ["drilling", "boring", "directional drill", "horizontal drill", "hdd", "microtrenching"],
+};
+
+function expandSynonyms(term) {
+  const t = term.toLowerCase();
+  for (const [, group] of Object.entries(SYNONYMS)) {
+    if (group.some(s => s === t || t === s)) return group;
+  }
+  return null;
+}
+
+function textOf(d) {
+  return (d.name + " " + d.location + " " + d.state + " " + d.category + " " + (d.owner || "") + " " + d.description + " " + d.detail).replace(/&amp;/g, "&").toLowerCase();
+}
+
+const PREFIX_TYPES = { state: "state", cat: "cat", owner: "owner", before: "before", after: "after" };
+
+function parseTerms(raw) {
+  const tokens = [];
+  const re = /(-?)(?:(\w+):"([^"]*)"|"([^"]*)"|(~?)(\S+))/g;
+  let m;
+  while ((m = re.exec(raw)) !== null) {
+    const neg = m[1] === "-";
+    let prefix = m[2] ? m[2].toLowerCase() : null;
+    let value = m[3];
+    const phrase = m[4];
+    const syn = m[5] === "~";
+    const word = m[6];
+    if (!prefix && word) {
+      const p = word.match(/^(\w+):(.+)$/);
+      if (p && PREFIX_TYPES[p[1].toLowerCase()]) { prefix = p[1].toLowerCase(); value = p[2]; }
+    }
+    if (prefix && PREFIX_TYPES[prefix]) {
+      const v = (prefix === "before" || prefix === "after") ? value : value.toLowerCase();
+      tokens.push({ neg, terms: [v], type: PREFIX_TYPES[prefix] });
+    } else if (phrase !== undefined) {
+      tokens.push({ neg, terms: [phrase.toLowerCase()], type: "phrase" });
+    } else {
+      const w = word || (m[2] + ':"' + m[3] + '"');
+      const expanded = syn ? expandSynonyms(w) : null;
+      tokens.push({ neg, terms: expanded || [w.toLowerCase()], type: "text" });
+    }
+  }
+  return tokens;
+}
+
+function parseSearch(raw) {
+  if (!raw || !raw.trim()) return null;
+  const groups = raw.split(/\s+OR\s+/).map(parseTerms).filter(g => g.length);
+  return groups.length ? groups : null;
+}
+
+function matchSearch(d, groups) {
+  if (!groups) return true;
+  const blob = textOf(d);
+  return groups.some(tokens => matchAll(d, tokens, blob));
+}
+
+function matchAll(d, tokens, blob) {
+  for (const tok of tokens) {
+    let hit = false;
+    if (tok.type === "state") {
+      hit = tok.terms.some(t => d.state.toLowerCase().includes(t));
+    } else if (tok.type === "cat") {
+      hit = tok.terms.some(t => d.category.toLowerCase().includes(t));
+    } else if (tok.type === "owner") {
+      hit = tok.terms.some(t => (d.owner || "").toLowerCase().includes(t));
+    } else if (tok.type === "before") {
+      hit = tok.terms.some(t => d.date && d.date <= t);
+    } else if (tok.type === "after") {
+      hit = tok.terms.some(t => d.date && d.date >= t);
+    } else {
+      hit = tok.terms.some(t => blob.includes(t));
+    }
+    if (tok.neg ? hit : !hit) return false;
+  }
+  return true;
+}
+
+function getVisible() {
+  const tokens = parseSearch(searchTerm);
+  return DATA.filter(d => {
+    if (activeFilter !== "all" && d.category !== activeFilter) return false;
+    return matchSearch(d, tokens);
+  });
+}
+
+function sortData(data) {
+  const cmp = (a, b) => {
+    let va, vb;
+    switch (sortCol) {
+      case "name": va = a.name; vb = b.name; return va.localeCompare(vb) * sortDir;
+      case "category": va = a.category; vb = b.category; return va.localeCompare(vb) * sortDir;
+      case "overbudget": va = a.overbudgetSort; vb = b.overbudgetSort; return (va - vb) * sortDir;
+      case "delay": va = a.delaySort; vb = b.delaySort; return (va - vb) * sortDir;
+      case "date": va = a.date || ""; vb = b.date || ""; return va.localeCompare(vb) * sortDir;
+      case "owner": va = a.owner || ""; vb = b.owner || ""; return va.localeCompare(vb) * sortDir;
+      case "location": va = a.location; vb = b.location; return va.localeCompare(vb) * sortDir;
+    }
+    return 0;
+  };
+  return [...data].sort(cmp);
+}
+
+function renderStats() {
+  const all = DATA;
+  const cats = {};
+  all.forEach(d => { cats[d.category] = (cats[d.category] || 0) + 1; });
+  document.getElementById("statsBar").innerHTML = `
+    <div class="stat-card"><div class="label">Projects</div><div class="value">${all.length}</div></div>
+    ${PRESENT_CATEGORIES.map(c => `<div class="stat-card"><div class="label">${c.name}</div><div class="value" style="color:${c.color}">${cats[c.name] || 0}</div></div>`).join('')}
+  `;
+}
+
+// Help copy is written for the original four categories; new categories reuse the matching copy until their own is written.
+function legacyHelpCategory(d, n) {
+  switch (d.category) {
+    case "Dig-in / Line Strike": return "Dig-in / Line Strike";
+    case "Unknown or Mismapped Utilities": return "Plan Revision";
+    case "Utility Relocation Delays": return "Conflicting Schedules";
+    case "Planned Project Conflicts":
+      return /pav|moratori|street.cut|resurfac|torn up|tore up|cut into/.test(n) ? "Paving Moratorium Violation" : "Conflicting Schedules";
+    default: return null;
+  }
+}
+
+function getCivilGridHelp(d) {
+  const n = (d.name + ' ' + d.detail).toLowerCase();
+  const cat = legacyHelpCategory(d, n);
+  if (!cat) return null;
+  if (cat === "Dig-in / Line Strike") {
+    if (n.includes("fiber") && n.includes("gas"))
+      return "CivilGrid's shared excavation map would have shown the fiber crew the exact location of the gas main before drilling began, preventing the strike entirely.";
+    if (n.includes("fiber") || n.includes("broadband"))
+      return "CivilGrid would have surfaced accurate underground utility data to the fiber installation crew, replacing reliance on third-party locate markings that proved incorrect.";
+    if (n.includes("horizontal drill") || n.includes("directional drill") || n.includes("boring"))
+      return "CivilGrid's subsurface conflict detection would have flagged the utility crossing before the bore path was finalized, allowing the crew to reroute.";
+    if (n.includes("sewer") || n.includes("force main"))
+      return "CivilGrid would have alerted the drilling crew to the sewer infrastructure in the bore path, preventing the rupture and the resulting contamination.";
+    if (n.includes("water main") || n.includes("transmission main"))
+      return "CivilGrid's utility coordination platform would have provided accurate location data for the water main, preventing the strike and service disruption.";
+    if (n.includes("unmarked") || n.includes("mismark") || n.includes("inaccurat"))
+      return "CivilGrid maintains a living record of underground assets that doesn't depend on one-time locate markings — the line's true position would have been available to the crew.";
+    if (n.includes("cross-bore") || n.includes("cross bore"))
+      return "CivilGrid's conflict detection would have flagged the intersection of the gas line with the existing sewer line at installation time, preventing the cross-bore.";
+    if (n.includes("pipeline") || n.includes("rupture"))
+      return "CivilGrid's coordination layer would have ensured all parties had accurate pipeline location data before work began in the vicinity.";
+    if (n.includes("school") || n.includes("hospital") || n.includes("evacuat"))
+      return "CivilGrid would have flagged the proximity of sensitive facilities to the dig zone and ensured accurate utility data before excavation near occupied buildings.";
+    if (n.includes("locate") || n.includes("miss dig") || n.includes("811"))
+      return "CivilGrid supplements 811/one-call data with continuously updated utility records, catching the gaps that led to this locate failure.";
+    return "CivilGrid's shared excavation map would have given the crew accurate utility positions before breaking ground, preventing the strike.";
+  }
+  if (cat === "Plan Revision") {
+    if (n.includes("tunnel") || n.includes("tbm") || n.includes("boring machine"))
+      return "CivilGrid's subsurface data aggregation would have revealed utility conflicts along the tunnel alignment during design, avoiding costly mid-construction reroutes.";
+    if (n.includes("light rail") || n.includes("lrt") || n.includes("streetcar") || n.includes("brt") || n.includes("transit"))
+      return "CivilGrid would have identified the full scope of utility relocations during the design phase, producing realistic cost and schedule estimates before construction began.";
+    if (n.includes("utility relocation") || n.includes("relocat"))
+      return "CivilGrid's multi-utility coordination would have sequenced relocations across all providers in parallel with design, compressing the timeline and preventing cascading delays.";
+    if (n.includes("unknown util") || n.includes("no record") || n.includes("no accurate record") || n.includes("century-old") || n.includes("100-year"))
+      return "CivilGrid builds a living map of underground assets — including legacy infrastructure with no paper records — so projects discover conflicts in design, not mid-dig.";
+    if (n.includes("cso") || n.includes("sewer") || n.includes("stormwater") || n.includes("wastewater"))
+      return "CivilGrid would have mapped all crossing utilities along the sewer corridor during planning, preventing the mid-construction scope changes that drove cost overruns.";
+    if (n.includes("highway") || n.includes("freeway") || n.includes("interchange") || n.includes("i-"))
+      return "CivilGrid's corridor-wide utility scan would have quantified all underground conflicts before bid, producing a realistic budget and preventing change-order overruns.";
+    if (n.includes("cancel"))
+      return "CivilGrid's early-stage utility conflict analysis could have produced accurate relocation cost estimates before political commitments were made, enabling informed go/no-go decisions.";
+    if (n.includes("bridge"))
+      return "CivilGrid would have identified utility attachments and subsurface crossings during bridge design, preventing discovery-phase surprises that drove cost increases.";
+    return "CivilGrid's pre-construction utility coordination would have identified underground conflicts during design, preventing the mid-project scope changes that inflated costs.";
+  }
+  if (cat === "Conflicting Schedules") {
+    if (n.includes("utility pole") || n.includes("georgia power") || n.includes("pole relocation"))
+      return "CivilGrid's shared timeline would have coordinated pole relocations with road construction milestones, preventing the multi-year standstill while waiting for utility crews.";
+    if (n.includes("gas pipeline") || n.includes("energy transfer") || n.includes("kinder morgan"))
+      return "CivilGrid would have flagged the pipeline relocation dependency at project kickoff and tracked the utility company's queue position, enabling realistic scheduling.";
+    if (n.includes("easement"))
+      return "CivilGrid would have identified the required easements during project scoping, starting acquisition in parallel with design instead of discovering gaps mid-construction.";
+    if (n.includes("bridge"))
+      return "CivilGrid's coordination platform would have synchronized utility relocations with bridge construction phasing, preventing contractors from waiting idle for utility clearance.";
+    if (n.includes("road") || n.includes("widening") || n.includes("boulevard") || n.includes("highway") || n.includes("avenue"))
+      return "CivilGrid would have sequenced utility relocations ahead of the road contractor's schedule, ensuring cleared corridors were ready when crews arrived.";
+    if (n.includes("transmission") || n.includes("power line") || n.includes("electric"))
+      return "CivilGrid's multi-stakeholder timeline would have aligned transmission line work with the broader project schedule, preventing years of permitting-driven delay.";
+    if (n.includes("permit") || n.includes("permitting"))
+      return "CivilGrid's coordination layer would have flagged the permitting dependencies early, enabling parallel processing instead of sequential bottlenecks.";
+    return "CivilGrid's shared project timeline would have aligned utility company schedules with the construction contractor's, preventing the idle time that drove cost overruns.";
+  }
+  if (cat === "Paving Moratorium Violation") {
+    if (n.includes("fiber") && (n.includes("microtren") || n.includes("nanotren") || n.includes("shallow")))
+      return "CivilGrid's moratorium tracking would have flagged protected streets before installation began, and its coordination layer ensures fiber work is completed before scheduled repaving.";
+    if (n.includes("fiber") || n.includes("broadband") || n.includes("gigapower") || n.includes("at&t"))
+      return "CivilGrid would have coordinated fiber deployment with the city's paving schedule, ensuring installations happen before — not after — road resurfacing.";
+    if (n.includes("freshly") || n.includes("just") || n.includes("weeks after") || n.includes("repav"))
+      return "CivilGrid's moratorium calendar would have prevented the utility dig-up by scheduling the underground work before the road was resurfaced.";
+    if (n.includes("permit") || n.includes("audit") || n.includes("comptroller"))
+      return "CivilGrid's automated permit tracking and moratorium enforcement would have caught non-compliant street openings before they degraded newly paved roads.";
+    if (n.includes("damage") || n.includes("complaint") || n.includes("restoration"))
+      return "CivilGrid's coordination platform ensures utility work and road restoration are scheduled together, preventing the cycle of pave-then-cut that generates complaints and wasted spending.";
+    return "CivilGrid's moratorium tracking and paving coordination would have ensured utility work was completed before the road was resurfaced, preventing the need to re-cut new pavement.";
+  }
+  return "CivilGrid's utility coordination platform would have surfaced the underground conflicts earlier in the project lifecycle, reducing cost overruns and delays.";
+}
+
+let lastVisible = [];
+let currentPage = 0;
+const PAGE_SIZE = 100;
+
+function renderDetail(d) {
+  return `<div class="detail-content">
+    <div class="detail-grid" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="detail-item"><div class="detail-label">Budget</div><div class="detail-value">${d.budget || '<span class="missing">Data not available</span>'}</div></div>
+      <div class="detail-item"><div class="detail-label">Timeline</div><div class="detail-value">${d.timeline || '<span class="missing">Data not available</span>'}</div></div>
+      <div class="detail-item"><div class="detail-label">Project Owner</div><div class="detail-value">${d.owner || '<span class="missing">Not available</span>'}</div></div>
+    </div>
+    <div class="detail-description">${d.detail}</div>
+    ${(help => help ? `<div class="detail-civilgrid"><strong>How CivilGrid could have helped:</strong> ${help}</div>` : '')(d.help || getCivilGridHelp(d))}
+    <div class="detail-source">${(d.sources || [d.source]).length > 1 ? 'Sources' : 'Source'}: ${(d.sources || [d.source]).map(u => `<a href="${u}" target="_blank" rel="noopener">${u}</a>`).join('<br>')}</div>
+  </div>`;
+}
+
+function renderPagination(total) {
+  const pages = Math.ceil(total / PAGE_SIZE);
+  const el = document.getElementById("pagination");
+  if (pages <= 1) { el.innerHTML = ""; return; }
+  const start = currentPage * PAGE_SIZE + 1;
+  const end = Math.min((currentPage + 1) * PAGE_SIZE, total);
+  let html = `<button class="page-btn" data-page="prev" ${currentPage === 0 ? "disabled" : ""}>&lsaquo;</button>`;
+  for (let p = 0; p < pages; p++) {
+    if (pages > 7 && p > 1 && p < pages - 2 && Math.abs(p - currentPage) > 1) {
+      if (p === 2 || p === pages - 3) html += `<span class="page-info">…</span>`;
+      continue;
+    }
+    html += `<button class="page-btn${p === currentPage ? " active" : ""}" data-page="${p}">${p + 1}</button>`;
+  }
+  html += `<button class="page-btn" data-page="next" ${currentPage >= pages - 1 ? "disabled" : ""}>&rsaquo;</button>`;
+  html += `<span class="page-info">${start}–${end} of ${total}</span>`;
+  el.innerHTML = html;
+}
+
+function render(resetPage) {
+  if (typeof collapseDetail === "function") collapseDetail();
+  const visible = sortData(getVisible());
+  lastVisible = visible;
+  if (resetPage) currentPage = 0;
+  const pages = Math.ceil(visible.length / PAGE_SIZE);
+  if (currentPage >= pages) currentPage = Math.max(0, pages - 1);
+  const start = currentPage * PAGE_SIZE;
+  const pageData = visible.slice(start, start + PAGE_SIZE);
+  document.getElementById("countLabel").textContent = `${visible.length} project${visible.length === 1 ? "" : "s"}`;
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = pageData.map((d, i) => `<tr class="main-row" data-idx="${start + i}">
+      <td><div class="name-cell"><span class="expand-icon">▶</span><span class="name-text">${d.name}</span></div></td>
+      <td><span class="category-badge ${getCatClass(d.category)}">${d.category}</span></td>
+      <td>${d.overbudgetAbs ? `<span class="money">${d.overbudgetAbs}</span>${d.overbudgetPct ? `<br><span style="font-size:12px;color:var(--text-dim)">${d.overbudgetPct}</span>` : ''}` : '<span class="missing">Not quantified</span>'}</td>
+      <td>${d.delayAbs ? `<span class="time-delay">${d.delayAbs}</span>${d.delayPct ? `<br><span style="font-size:12px;color:var(--text-dim)">${d.delayPct}</span>` : ''}` : '<span class="missing">Not quantified</span>'}</td>
+      <td><span class="date-text">${fmtDate(d.date)}</span></td>
+      <td><span class="owner-text" title="${(d.owner || '').replace(/"/g, '&quot;')}">${d.owner || ''}</span></td>
+      <td><span class="location-text">${d.location}</span></td>
+    </tr>`).join("");
+  renderPagination(visible.length);
+
+  document.querySelectorAll("thead th").forEach(th => {
+    th.classList.toggle("sorted", th.dataset.sort === sortCol);
+    th.querySelector(".sort-arrow").textContent = (th.dataset.sort === sortCol && sortDir === 1) ? "▲" : "▼";
+  });
+}
+
+let expandedRow = null;
+const detailTr = document.createElement("tr");
+detailTr.className = "detail-row visible";
+detailTr.innerHTML = '<td colspan="7"></td>';
+
+function collapseDetail() {
+  if (expandedRow) {
+    expandedRow.classList.remove("expanded");
+    if (detailTr.parentNode) detailTr.parentNode.removeChild(detailTr);
+    detailTr.firstChild.innerHTML = "";
+    expandedRow = null;
+  }
+}
+
+document.getElementById("tableBody").addEventListener("click", function(e) {
+  const row = e.target.closest(".main-row");
+  if (!row) return;
+  const idx = parseInt(row.dataset.idx, 10);
+  const wasExpanded = row === expandedRow;
+  collapseDetail();
+  if (!wasExpanded) {
+    expandedRow = row;
+    row.classList.add("expanded");
+    detailTr.firstChild.innerHTML = renderDetail(lastVisible[idx]);
+    row.after(detailTr);
+  }
+});
+
+document.getElementById("pagination").addEventListener("click", function(e) {
+  const btn = e.target.closest(".page-btn");
+  if (!btn || btn.disabled) return;
+  const p = btn.dataset.page;
+  if (p === "prev") currentPage--;
+  else if (p === "next") currentPage++;
+  else currentPage = parseInt(p, 10);
+  render();
+  document.getElementById("tableContainer").scrollIntoView({behavior: "instant"});
+});
+
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    activeFilter = btn.dataset.filter;
+    render(true);
+    if (currentView === 'map') renderMap();
+  });
+});
+
+document.getElementById("searchBox").addEventListener("input", e => {
+  searchTerm = e.target.value;
+  render(true);
+  if (currentView === 'map') renderMap();
+});
+
+document.querySelectorAll(".view-btn").forEach(btn => {
+  btn.addEventListener("click", () => switchView(btn.dataset.view));
+});
+
+document.querySelectorAll("thead th").forEach(th => {
+  th.addEventListener("click", () => {
+    const col = th.dataset.sort;
+    if (sortCol === col) sortDir *= -1;
+    else { sortCol = col; sortDir = -1; }
+    render();
+  });
+});
+
+renderStats();
+
+
+render();
+</script>
+</body>
+</html>
